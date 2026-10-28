@@ -1,25 +1,94 @@
 <!doctype html>
-<html lang="tr"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Fen Video Macerası</title>
+<html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Fen Video Macerası</title>
 <style>
-:root{color-scheme:dark}*{box-sizing:border-box}body{margin:0;background:#0b1020;color:#f1f5ff;font:16px/1.5 system-ui,sans-serif}header{padding:16px 5%;background:#111a30;border-bottom:1px solid #344668;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}main{max-width:950px;margin:auto;padding:20px}.card{background:#151f37;border:1px solid #344668;border-radius:16px;padding:20px;margin:0 0 16px}h1{margin:0;color:#7de5ff}p{color:#bac8e3}iframe{width:100%;aspect-ratio:16/9;border:0;border-radius:12px;background:#000}button{cursor:pointer;background:#1b2947;color:#fff;border:1px solid #466083;border-radius:10px;padding:11px 14px;font:inherit;margin:5px 0}button:hover{border-color:#7de5ff}.primary{background:#7de5ff;color:#071321;font-weight:800}.answer{display:block;width:100%;text-align:left}.hidden{display:none}.progress{height:8px;background:#344668;border-radius:8px;overflow:hidden;margin:12px 0}.progress div{height:100%;width:0;background:#7de5ff}a{color:#7de5ff}
-</style>
-<header><b>🚀 FEN BİLİMLERİ · VİDEO MACERASI</b><b>⭐ <span id="score">0</span> puan</b></header><main>
-<section class="card"><h1 id="headline">Ders başlıyor!</h1><p id="status">Video bölüm bölüm oynatılır. Bölüm bitince durur ve mini test açılır.</p><b id="counter"></b><div class="progress"><div id="bar"></div></div></section>
-<section class="card"><h2 id="chapter">Giriş ve Uzay Araştırmaları Konu Özeti</h2><div id="player"></div><p id="hint">Otomatik oynatma engellenirse videodaki oynat düğmesine bas.</p><a id="yt" target="_blank" rel="noopener">Videoyu YouTube'da aç ↗</a><div id="quiz" class="hidden"><hr><h3 id="q"></h3><div id="answers"></div><p id="feedback"></p><button id="next" class="primary hidden">Sonraki soru</button><button id="continue" class="primary hidden">Sonraki bölüme geç →</button></div><div id="done" class="hidden"><h2>🎉 Tamamlandı!</h2><p id="result"></p><button class="primary" onclick="location.reload()">Baştan başla</button></div></section>
-<p>Not: Videonun gömülü oynatımı YouTube tarafından engellenirse “Videoyu YouTube'da aç” bağlantısını kullanabilirsin.</p></main>
+:root{color-scheme:dark}*{box-sizing:border-box}body{margin:0;background:#0b1020;color:#f1f5ff;font:16px/1.55 system-ui,sans-serif}header{padding:16px 5%;background:#111a30;border-bottom:1px solid #344668;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}main{max-width:960px;margin:auto;padding:20px}.card{background:#151f37;border:1px solid #344668;border-radius:16px;padding:20px;margin-bottom:16px}h1,h2{margin-top:0;color:#7de5ff}p{color:#bac8e3}iframe{width:100%;aspect-ratio:16/9;border:0;border-radius:12px;background:#000}button{cursor:pointer;background:#1b2947;color:#fff;border:1px solid #466083;border-radius:10px;padding:11px 14px;font:inherit;margin:5px 4px 0 0}button:hover{border-color:#7de5ff}.primary{background:#7de5ff;color:#071321;font-weight:800}.answer{display:block;width:100%;text-align:left}.answer:disabled{cursor:default;opacity:.9}.hidden{display:none}.progress{height:8px;background:#344668;border-radius:8px;overflow:hidden;margin:12px 0}.progress div{height:100%;width:0;background:#7de5ff}.muted{font-size:.92rem;color:#bac8e3}.good{color:#76f0b0}.bad{color:#ffadad}
+</style></head><body>
+<header><b>🚀 FEN BİLİMLERİ · VİDEO MACERASI</b><b><span id="score">0</span> puan</b></header>
+<main><section class="card"><h1 id="headline">Ders başlıyor!</h1><p id="status">Video bölüm bölüm oynar. Her bölüm bitince farklı sorular gelir.</p><b id="counter"></b><div class="progress"><div id="bar"></div></div></section>
+<section class="card"><h2 id="chapter">Giriş ve Uzay Araştırmaları</h2><div id="player"></div><p id="hint" class="muted">Otomatik oynatma engellenirse videodaki oynat düğmesine bas.</p><a id="yt" target="_blank" rel="noopener">Videoyu YouTube'da aç</a><div id="quiz" class="hidden"><hr><h2>🧠 Bölüm testi</h2><p id="q"></p><div id="answers"></div><p id="feedback" aria-live="polite"></p><p id="qcounter" class="muted"></p><button id="next" class="primary hidden">Sonraki soru</button><button id="continue" class="primary hidden">Sonraki bölüme geç →</button></div><div id="done" class="hidden"><h2>🎉 Tamamlandı!</h2><p id="result"></p><button class="primary" onclick="location.reload()">Baştan başla</button></div></section>
+<section class="card"><b>Nasıl çalışır?</b><p class="muted">Her bölüm sonunda iki soru sorulur. Sorular aynı oturumda tekrar etmez; yanlış cevapta doğru seçenek ve kısa açıklama gösterilir.</p></section></main>
 <script>
 const video='U5ijr0x9Hsg';
-const C=[['Giriş ve Uzay Araştırmaları Konu Özeti',0,1183],['Kuvvet, İş ve Enerji Konu Özeti',1183,1767],['Bu Soruya Aman Dikkat',1767,1946],['Sınavda Görürsen Şaşırma',1946,2052],['Yazılıda Kesin Karşına Çıkar',2052,2182],['Yazılıya Girmeden Önce Buna Bak',2182,2367],['Sınavda Aynısını Görebilirsin',2367,2469],['Bu Sorular Kaçmaz',2469,2588],['Sınavda Aynısını Görebilirsin',2588,2777],['Yazılıda %100 Çıkar',2777,3150],['Bu Tarz Soruya Dikkat',3150,3330],['Yazılı Provası',3330,3462],['Yazılıda Benzeri Gelir',3462,3549],['Yazılıda Aynısını Görebilirsin',3549,3649],['MEB Soru Havuzu Benzeri',3649,3830],['Yazılı Denemeleri',3830,3982],['Bu Soru Tarzına Dikkat',3982,4094],['Yazılı Provası',4094,4394],['Ortak Yazılı Bankası',4394,4635],['Yazılı Denemeleri',4635,4752],['Yazılıda %100 Çıkar',4752,4876],['Bu Soru Tarzı Çıkar',4876,4994],['Yazılı Provası',4994,5134],['Yazılıda Benzeri Gelir',5134,5206],['MEB Soru Havuzu Benzeri',5206,5400]];
-const Q=[
-[{q:'Uzay teleskoplarının önemli avantajı nedir?',a:['Atmosferin dışında gözlem yapmaları','Sadece gündüz çalışmaları','İnsanları uzaya taşımaları'],c:0,e:'Atmosferin dışında gözlem yapmaları daha ayrıntılı görüntüler almaya yardımcı olur.'},{q:'Gözlem uyduları ne için kullanılabilir?',a:['Dünya’yı ve hava durumunu izlemek','Yer çekimini kapatmak','Gezegenleri hareket ettirmek'],c:0,e:'Uydular Dünya’yı gözlemlemek ve hava durumunu takip etmek için kullanılır.'}],
-[{q:'Fiziksel anlamda iş yapılması için hangisi gerekir?',a:['Kuvvet ve yer değiştirme','Sadece cismin ağır olması','Ses çıkması'],c:0,e:'Fiziksel iş için kuvvet ve yer değiştirme gerekir.'},{q:'İşin birimi hangisidir?',a:['Joule (J)','Kilogram (kg)','Metre (m)'],c:0,e:'İş joule ile ölçülür.'}]
+const chapters=[
+['Giriş ve Uzay Araştırmaları Konu Özeti',0,1183],
+['Kuvvet, İş ve Enerji Konu Özeti',1183,1767],
+['Bu Soruyla Aman Dikkat',1767,1946],
+['Sınavda Görürsen Şaşırma',1946,2052],
+['Yazılıda Kesin Karşına Çıkar',2052,2182],
+['Yazılıya Girmeden Önce Buna Bak',2182,2367],
+['Sınavda Aynısını Görebilirsin',2367,2469],
+['Bu Sorular Kaçmaz',2469,2588],
+['Sınavda Aynısını Görebilirsin',2588,2777],
+['Yazılıda %100 Çıkar',2777,3150],
+['Bu Tarz Soruya Dikkat',3150,3330],
+['Yazılı Provası',3330,3462],
+['Yazılıda Benzeri Gelir',3462,3549],
+['Yazılıda Aynısını Görebilirsin',3549,3649],
+['MEB Soru Havuzu Benzeri',3649,3830],
+['Yazılı Denemeleri',3830,3982],
+['Bu Soru Tarzına Dikkat',3982,4094],
+['Yazılı Provası',4094,4394],
+['Ortak Yazılı Bankası',4394,4635],
+['Yazılı Denemeleri',4635,4752],
+['Yazılıda %100 Çıkar',4752,4876],
+['Bu Soru Tarzı Çıkar',4876,4994],
+['Yazılı Provası',4994,5134],
+['Yazılıda Benzeri Gelir',5134,5206],
+['MEB Soru Havuzu Benzeri',5206,5400]
 ];
-let i=0,qi=0,score=0,player,ready=false,stopped=false,watch;
-const $=x=>document.getElementById(x),fmt=s=>String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');
-function load(i0){i=i0;qi=0;stopped=false;$('quiz').classList.add('hidden');$('done').classList.add('hidden');$('headline').textContent='Ders devam ediyor';$('chapter').textContent=C[i][0];$('counter').textContent='Bölüm '+(i+1)+' / '+C.length+' · '+fmt(C[i][1])+'–'+fmt(C[i][2]);$('bar').style.width=(i/C.length*100)+'%';$('yt').href='https://www.youtube.com/watch?v='+video+'&t='+C[i][1]+'s';if(ready)player.loadVideoById({videoId:video,startSeconds:C[i][1]});}
-function stopAndQuiz(){if(stopped)return;stopped=true;player.pauseVideo();clearInterval(watch);$('headline').textContent='Bölüm testi';$('status').textContent='Bölüm tamamlandı. Soruları yanıtla, ardından sonraki bölüme geç.';$('bar').style.width=((i+1)/C.length*100)+'%';$('quiz').classList.remove('hidden');draw();}
-function draw(){const list=Q[i]||Q[1],q=list[qi];$('q').textContent='Soru '+(qi+1)+'/'+list.length+': '+q.q;$('answers').innerHTML='';$('feedback').textContent='';$('next').classList.add('hidden');$('continue').classList.add('hidden');q.a.forEach((a,j)=>{let b=document.createElement('button');b.className='answer';b.textContent=String.fromCharCode(65+j)+') '+a;b.onclick=()=>{Array.from($('answers').children).forEach(x=>x.disabled=true);if(j===q.c){score+=100;$('score').textContent=score;$('feedback').textContent='✅ Doğru! +100 puan. '+q.e}else $('feedback').textContent='❌ Doğru cevap: '+q.a[q.c]+'. '+q.e;if(qi+1<list.length)$('next').classList.remove('hidden');else $('continue').classList.remove('hidden')};$('answers').appendChild(b)});}
-$('next').onclick=()=>{qi++;draw()};$('continue').onclick=()=>{if(i<C.length-1)load(i+1);else{$('quiz').classList.add('hidden');$('done').classList.remove('hidden');$('result').textContent='Toplam puanın: '+score;$('headline').textContent='Ders tamamlandı!';$('bar').style.width='100%';clearInterval(watch)}};
-window.onYouTubeIframeAPIReady=()=>{player=new YT.Player('player',{videoId:video,playerVars:{playsinline:1,rel:0,origin:location.origin},events:{onReady:e=>{ready=true;e.target.loadVideoById({videoId:video,startSeconds:C[i][1]});e.target.playVideo();watch=setInterval(()=>{if(!stopped&&ready&&player.getCurrentTime()>=C[i][2]-.4)stopAndQuiz()},250)},onStateChange:e=>{if(e.data===1){$('status').textContent='Video oynuyor; bölüm sonunda otomatik duracak.';if(watch)clearInterval(watch);watch=setInterval(()=>{if(!stopped&&player.getCurrentTime()>=C[i][2]-.4)stopAndQuiz()},250)}}}})};
-let s=document.createElement('script');s.src='https://www.youtube.com/iframe_api';document.head.appendChild(s);load(0);
-</script></html>
+// Her soruda doğru seçenek (c) ve açıklama var. Soru havuzu çeşitlidir; bir kez sorulan soru tekrar seçilmez.
+const space=[
+{q:'Uzay teleskoplarının önemli avantajı nedir?',a:['Atmosferin görüntüyü bozma etkisinin azalması','Sadece gündüz çalışmaları','İnsanları uzaya taşımaları'],c:0,e:'Atmosfer dışında gözlem yaptıkları için daha net veri toplayabilirler.'},
+{q:'Yapay uyduların kullanım amaçlarından biri hangisidir?',a:['Hava durumunu ve Dünya’yı gözlemlemek','Yer çekimini kapatmak','Güneş’i söndürmek'],c:0,e:'Uydular haberleşme, hava tahmini, konum belirleme ve gözlemde kullanılır.'},
+{q:'Uzay araştırmalarında teleskop ne işe yarar?',a:['Uzak gök cisimlerini gözlemlemeye','Gezegenleri hareket ettirmeye','Uzaydaki sesleri doğrudan duymaya'],c:0,e:'Teleskoplar gök cisimlerinden gelen ışınımı toplar ve inceler.'},
+{q:'Bir uzay aracının Dünya çevresinde dolanmasını sağlayan temel etki nedir?',a:['Yer çekimi','Sürtünmenin artması','Ses dalgaları'],c:0,e:'Yer çekimi, uygun hızla hareket eden aracı yörüngede tutabilir.'},
+{q:'Uzay kirliliği denince ne anlaşılır?',a:['İşlevini yitirmiş araç ve parçaların yörüngede birikmesi','Okyanusların kirlenmesi','Bulutların çoğalması'],c:0,e:'Eski uydular ve roket parçaları uzay çöplerini oluşturur.'},
+{q:'Astronotların uzayda araştırma yapmasının bir nedeni nedir?',a:['İnsanların uzay koşullarındaki durumunu ve deneyleri incelemek','Dünya’nın dönüşünü durdurmak','Gezegenlerin boyunu değiştirmek'],c:0,e:'Uzay görevleri bilimsel deney ve gözlemler için yapılır.'},
+{q:'Haberleşme uyduları en çok hangi işe yarar?',a:['Sinyal ve iletişim aktarımına','Depremleri durdurmaya','Mevsimleri değiştirmeye'],c:0,e:'Televizyon, telefon ve veri iletişimini aktarabilirler.'},
+{q:'Uzay araştırmalarında robot araçlar neden kullanılır?',a:['İnsanların gitmesinin zor veya riskli olduğu yerleri incelemek','Yer çekimini yok etmek','Her gezegeni Dünya’ya taşımak'],c:0,e:'Robot araçlar uzak ve tehlikeli ortamlarda ölçüm yapabilir.'}
+];
+const physics=[
+{q:'Fiziksel anlamda iş yapılması için hangisi gereklidir?',a:['Kuvvetin cisimde yer değiştirme oluşturması','Cisme bakılması','Cismin mutlaka ısınması'],c:0,e:'Fiziksel iş için kuvvetin etkisiyle yer değiştirme olmalıdır.'},
+{q:'Bir cisim aynı yönde 10 N kuvvetle 3 m hareket ederse yapılan iş kaç joule olur?',a:['30 J','13 J','7 J'],c:0,e:'İş = kuvvet × kuvvet yönündeki yer değiştirme: 10 × 3 = 30 J.'},
+{q:'İşin SI birimi hangisidir?',a:['Joule (J)','Kilogram (kg)','Metre (m)'],c:0,e:'İş ve enerji joule ile ölçülür.'},
+{q:'Bir öğrenci duvarı itiyor ama duvar hareket etmiyorsa duvara yapılan fiziksel iş nedir?',a:['Sıfır','Çok büyük','Kesinlikle 1 joule'],c:0,e:'Duvar yer değiştirmediği için duvar üzerinde fiziksel iş yapılmaz.'},
+{q:'Hareket eden bir cismin sahip olduğu enerji hangisidir?',a:['Kinetik enerji','Yalnızca ses enerjisi','Kimyasal enerji'],c:0,e:'Kinetik enerji hareketten kaynaklanır.'},
+{q:'Yerden yüksekte duran bir cismin konumundan dolayı sahip olduğu enerji hangisidir?',a:['Çekim potansiyel enerjisi','Kinetik enerji','Elektrik akımı'],c:0,e:'Yükseklik arttıkça, diğer koşullar aynıysa çekim potansiyel enerjisi artar.'},
+{q:'Aynı hızla hareket eden iki cisimden kütlesi daha büyük olanın kinetik enerjisi nasıldır?',a:['Daha büyüktür','Daha küçüktür','Her zaman sıfırdır'],c:0,e:'Kinetik enerji kütleyle doğru orantılıdır.'},
+{q:'Bir cisim daha yükseğe çıkarılırsa çekim potansiyel enerjisi nasıl değişir?',a:['Artar','Azalır','Değişmesi imkânsızdır'],c:0,e:'Yer çekimi ve kütle aynıyken yükseklik artarsa potansiyel enerji artar.'},
+{q:'Sürtünme kuvveti hareket enerjisinin bir kısmını çoğunlukla neye dönüştürür?',a:['Isı enerjisine','Kütleye','Yeni maddeye her zaman'],c:0,e:'Sürtünme sırasında mekanik enerjinin bir bölümü ısıya dönüşür.'},
+{q:'Enerjinin korunumu neyi ifade eder?',a:['Enerji yoktan var edilemez, yok edilemez; dönüşebilir','Enerji her zaman azalır ve kaybolur','Enerji yalnızca canlılarda bulunur'],c:0,e:'Enerji farklı türlere dönüşebilir, toplam enerji korunur.'},
+{q:'Bir makineye verilen enerji ile elde edilen yararlı enerji arasındaki farkın bir bölümü genellikle ne olur?',a:['Isı ve ses gibi çevreye aktarılır','Yoktan oluşur','Kütleye dönüşüp kaybolur'],c:0,e:'Gerçek sistemlerde enerjinin bir kısmı çevreye farklı biçimlerde aktarılır.'},
+{q:'Güç neyi ifade eder?',a:['Birim zamanda yapılan işi veya aktarılan enerjiyi','Cismin rengini','Yalnızca cismin kütlesini'],c:0,e:'Güç, iş yapma veya enerji aktarma hızıdır.'},
+{q:'Aynı işi daha kısa sürede yapan kişi için hangisi doğrudur?',a:['Ortalama gücü daha büyüktür','Gücü kesinlikle sıfırdır','Daha az zaman kullandığı için iş yapmamıştır'],c:0,e:'Güç = iş / zaman.'},
+{q:'Bir cismin hızını artırmak için genellikle ne gerekir?',a:['Cisme net kuvvet etki etmesi','Cismin renginin değişmesi','Kütlesinin mutlaka sıfır olması'],c:0,e:'Net kuvvet cismin hareket durumunu değiştirebilir.'},
+{q:'Kuvvetin birimi hangisidir?',a:['Newton (N)','Joule (J)','Watt (W)'],c:0,e:'Kuvvet newton ile ölçülür.'},
+{q:'Ağırlık hangi tür büyüklüktür?',a:['Yer çekiminin cisme uyguladığı kuvvet','Maddenin miktarı','Hacmin ölçüsü'],c:0,e:'Ağırlık bir kuvvettir ve newton ile ölçülür.'},
+{q:'Kütle ve ağırlık arasındaki doğru ifade hangisidir?',a:['Kütle madde miktarıdır; ağırlık yer çekimi kuvvetidir','İkisi her yerde aynı birimle ölçülür','Kütle newton, ağırlık kilogramdır'],c:0,e:'Kütlenin birimi kg, ağırlığın birimi N’dir.'},
+{q:'Sürtünme kuvveti çoğu durumda hangi yöndedir?',a:['Göreli harekete veya kayma eğilimine zıt yönde','Her zaman hareket yönünde','Daima yukarı doğru'],c:0,e:'Sürtünme, temas yüzeyleri arasındaki göreli harekete karşı koyar.'},
+{q:'Bir cismin hızını iki katına çıkarmak kinetik enerjisini nasıl etkiler?',a:['Dört katına çıkarır','İki katına çıkarır','Değiştirmez'],c:0,e:'Kinetik enerji hızın karesiyle orantılıdır.'},
+{q:'Bir cisim yere düşerken (hava direnci ihmal edilirse) enerjisi nasıl dönüşür?',a:['Potansiyel enerji kinetik enerjiye dönüşür','Kinetik enerji tamamen yok olur','Enerji oluşmaz'],c:0,e:'Düşerken yükseklik azalır ve hız artar; enerji tür değiştirir.'},
+{q:'Bir cisme uygulanan kuvvet ile yer değiştirme birbirine dikse, bu kuvvetin yaptığı iş nedir?',a:['Sıfır','En büyük değer','Her zaman negatif'],c:0,e:'Kuvvet yer değiştirmeye dik olduğunda kuvvetin yaptığı iş sıfırdır.'},
+{q:'Bir cismin hareket etmesi için net kuvvetin sürekli hareket yönünde olması şart mı?',a:['Hayır; net kuvvet sıfırsa sabit hızla da hareket edebilir','Evet, kuvvet yoksa cisim anında durur','Evet, her harekette hız artmalıdır'],c:0,e:'Net kuvvet sıfır olduğunda cisim durabilir veya sabit hızla hareket edebilir.'},
+{q:'Esnek bir yayın sıkıştırılmasıyla depolanan enerji hangisidir?',a:['Esneklik potansiyel enerjisi','Yalnızca çekim enerjisi','Kinetik enerji'],c:0,e:'Esnek cisimler şekil değiştirdiklerinde enerji depolayabilir.'},
+{q:'Watt hangi büyüklüğün birimidir?',a:['Güç','Kuvvet','Kütle'],c:0,e:'Gücün SI birimi watt’tır.'}
+];
+let i=0,qi=0,score=0,player=null,ready=false,stopped=false,watch=null,currentQs=[],used=new Set(),answered=false;
+const $=id=>document.getElementById(id),fmt=s=>String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');
+function questionsForChapter(index){
+ const pool=index===0?space:physics;
+ const available=pool.map((q,n)=>({q,n,key:(index===0?'s':'p')+n})).filter(x=>!used.has(x.key));
+ // Havuz bitene kadar sorular tekrar kullanılmaz; havuz biterse yeni tur başlar.
+ if(available.length<2){pool.forEach((q,n)=>used.delete((index===0?'s':'p')+n));return questionsForChapter(index)}
+ const shuffled=available.sort(()=>Math.random()-.5).slice(0,2);
+ shuffled.forEach(x=>used.add(x.key));return shuffled.map(x=>x.q);
+}
+function load(index){i=index;qi=0;stopped=false;answered=false;$('quiz').classList.add('hidden');$('done').classList.add('hidden');$('headline').textContent='Ders devam ediyor';$('chapter').textContent=chapters[i][0];$('counter').textContent='Bölüm '+(i+1)+' / '+chapters.length+' · '+fmt(chapters[i][1])+'–'+fmt(chapters[i][2]);$('bar').style.width=(i/chapters.length*100)+'%';$('yt').href='https://www.youtube.com/watch?v='+video+'&t='+chapters[i][1]+'s';currentQs=questionsForChapter(i);if(ready)startSegment()}
+function startSegment(){if(!player)return;player.loadVideoById({videoId:video,startSeconds:chapters[i][1]});player.playVideo();if(watch)clearInterval(watch);watch=setInterval(()=>{if(!stopped&&player&&player.getCurrentTime()>=chapters[i][2]-.35)stopQuiz()},250)}
+function stopQuiz(){if(stopped)return;stopped=true;if(watch)clearInterval(watch);player.pauseVideo();$('headline').textContent='Bölüm testi zamanı!';$('status').textContent='Bölüm bitti. Soruları yanıtla, sonra videoya devam et.';$('quiz').classList.remove('hidden');draw()}
+function draw(){$('q').textContent='Soru '+(qi+1)+'/2: '+currentQs[qi].q;$('qcounter').textContent='Bu bölümdeki sorular farklı seçildi.';$('answers').innerHTML='';$('feedback').textContent='';$('next').classList.add('hidden');$('continue').classList.add('hidden');answered=false;currentQs[qi].a.forEach((a,j)=>{const b=document.createElement('button');b.className='answer';b.textContent=String.fromCharCode(65+j)+') '+a;b.onclick=()=>answer(j,b);$('answers').appendChild(b)})}
+function answer(j,button){if(answered)return;answered=true;const q=currentQs[qi];[...$('answers').children].forEach(b=>b.disabled=true);if(j===q.c){score+=100;$('score').textContent=score;$('feedback').className='good';$('feedback').textContent='✓ Doğru! +100 puan. '+q.e}else{$('feedback').className='bad';$('feedback').textContent='✗ Doğru cevap: '+q.a[q.c]+'. '+q.e}if(qi===0)$('next').classList.remove('hidden');else $('continue').classList.remove('hidden')}
+$('next').onclick=()=>{qi=1;draw()};$('continue').onclick=()=>{if(i<chapters.length-1)load(i+1);else{$('quiz').classList.add('hidden');$('done').classList.remove('hidden');$('headline').textContent='Ders tamamlandı!';$('status').textContent='Tüm video bölümleri bitti.';$('result').textContent='Toplam puanın: '+score+' · Doğru cevapladığın sorularla puan topladın.';$('bar').style.width='100%';if(watch)clearInterval(watch)}};
+window.onYouTubeIframeAPIReady=()=>{player=new YT.Player('player',{height:'390',width:'640',videoId:video,playerVars:{playsinline:1,rel:0},events:{onReady:()=>{ready=true;startSegment()},onStateChange:e=>{if(e.data===YT.PlayerState.PLAYING&&watch)clearInterval(watch);if(e.data===YT.PlayerState.PLAYING)watch=setInterval(()=>{if(!stopped&&player.getCurrentTime()>=chapters[i][2]-.35)stopQuiz()},250)}}})};
+const s=document.createElement('script');s.src='https://www.youtube.com/iframe_api';document.head.appendChild(s);load(0);
+</script></body></html>
